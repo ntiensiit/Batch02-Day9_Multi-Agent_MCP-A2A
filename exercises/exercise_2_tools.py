@@ -52,7 +52,7 @@ def search_legal_knowledge(query: str) -> str:
 @tool
 def check_statute_of_limitations(case_type: str) -> str:
     """Kiểm tra thời hiệu khởi kiện theo loại vụ án.
-    
+
     Args:
         case_type: Loại vụ án (contract, tort, property)
     """
@@ -67,38 +67,38 @@ def check_statute_of_limitations(case_type: str) -> str:
 async def main():
     load_dotenv()
     llm = get_llm()
-    
+
     # Thêm tool mới vào danh sách
     tools = [search_legal_knowledge, check_statute_of_limitations]
     llm_with_tools = llm.bind_tools(tools)
-    
+
     question = "What is the statute of limitations for a contract breach?"
-    
+
     messages = [
         SystemMessage(content="Bạn là chuyên gia pháp lý. Sử dụng tools để tra cứu thông tin."),
         HumanMessage(content=question),
     ]
-    
+
     print(f"Question: {question}\n")
-    
+
     # First LLM call - decide which tools to use
     response = await llm_with_tools.ainvoke(messages)
     messages.append(response)
-    
+
     # Execute tools if requested
     if response.tool_calls:
         for tool_call in response.tool_calls:
             print(f"🔧 Gọi tool: {tool_call['name']}")
             tool_result = None
-            
+
             if tool_call["name"] == "search_legal_knowledge":
                 tool_result = search_legal_knowledge.invoke(tool_call["args"])
             elif tool_call["name"] == "check_statute_of_limitations":
                 tool_result = check_statute_of_limitations.invoke(tool_call["args"])
-            
-                if tool_result:
-                    messages.append(ToolMessage(content=tool_result, tool_call_id=tool_call["id"]))
-        
+
+            if tool_result:
+                messages.append(ToolMessage(content=tool_result, tool_call_id=tool_call["id"]))
+
         # Second LLM call - synthesize final answer
         final_response = await llm_with_tools.ainvoke(messages)
         print(f"\n✅ Kết quả:\n{final_response.content}")
