@@ -11,7 +11,7 @@ from langchain_core.tools import tool
 from common.llm import get_llm
 
 @tool
-def search_compliance_law(query: str) -> str:
+def search_privacy_law(query: str) -> str:
     """Search regulatory compliance knowledge base for applicable frameworks (including privacy).
 
     Args:
@@ -49,7 +49,7 @@ PRIVACY_SYSTEM_PROMPT = """You are a specialist in data protection and privacy l
 data breach notification requirements, consent management, and individual privacy rights.
 
 STRICT RULES:
-1. Use the search_compliance_law tool to ground your analysis.
+1. Use the search_privacy_law tool to ground your analysis.
 2. Do not discuss non-privacy legal issues.
 3. Avoid all preambles (e.g., "Based on the information provided...").
 4. Start your response directly with the label 'privacy_analysis: '.
@@ -65,7 +65,7 @@ def create_graph():
     llm = get_llm()
     graph = create_react_agent(
         model=llm,
-        tools=[search_compliance_law],
+        tools=[search_privacy_law],
         prompt=PRIVACY_SYSTEM_PROMPT,
     )
     return graph
