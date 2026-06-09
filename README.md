@@ -32,8 +32,9 @@ All agent discovery is dynamic — agents register their capabilities with the *
 |---|---|---|---|
 | Customer Agent | 10100 | `create_react_agent` | Entry point — routes user questions to Law Agent |
 | Law Agent | 10101 | Custom `StateGraph` | Orchestrator — analyses law, delegates in parallel |
-| Tax Agent | 10102 | `create_react_agent` | Specialist — tax law, IRS, penalties, FBAR/FATCA |
+| Tax Agent | 10102 | `create_react_agent` | Specialist — tax law, IRS, penalties, FBAR/FATCA (MCP-compatible) |
 | Compliance Agent | 10103 | `create_react_agent` | Specialist — SEC, SOX, FCPA, GDPR, AML |
+| Privacy Agent | 10104 | `create_react_agent` | Specialist — GDPR, CCPA, data-protection, breach notification |
 | Registry | 10000 | FastAPI (not an agent) | Service discovery and agent registration |
 
 ### Request Flow
@@ -44,9 +45,10 @@ User question
     → Registry: discover("legal_question") → Law Agent endpoint
     → Law Agent:
         [analyze_law]      LLM contract/tort analysis
-        [check_routing]    LLM decides: needs_tax? needs_compliance?
+        [check_routing]    LLM decides: needs_tax? needs_compliance? needs_privacy?
         [call_tax]         ──→ Registry discover → Tax Agent (A2A)     ┐
         [call_compliance]  ──→ Registry discover → Compliance (A2A)    ├ parallel
+        [call_privacy]     ──→ Registry discover → Privacy (A2A)       │
         [aggregate]        Combines all analyses into final response   ┘
   → Customer Agent returns response to user
 ```
@@ -54,10 +56,11 @@ User question
 ### Key Design Patterns
 
 - **Dynamic discovery** — agents find each other through the Registry, not hardcoded URLs
-- **Parallel delegation** — LangGraph `Send` API dispatches tax and compliance branches concurrently
+- **Parallel delegation** — LangGraph `Send` API dispatches tax, compliance, and privacy branches concurrently
 - **Trace propagation** — `trace_id` and `context_id` flow through every A2A hop for debugging
 - **Depth guards** — `MAX_DELEGATION_DEPTH = 3` prevents infinite delegation loops
 - **Annotated reducers** — `Annotated[str, _last_wins]` handles parallel writes to shared state fields
+- **Simulated MCP Protocol** — Tax Agent utilizes an educational MCP-compatible simulation implementing discovery (`list_tools`) and invocation (`call_tool`) to search local tax databases.
 
 ## Tech Stack
 
@@ -140,7 +143,7 @@ No servers needed — each demo runs as a standalone script:
 uv run python stages/stage_1_direct_llm/main.py
 uv run python stages/stage_2_rag_tools/main.py
 uv run python stages/stage_3_single_agent/main.py
-uv run python stages/stage_4_multi_agent/main.py
+uv run python stages/stage_4_milti_agent/main.py
 ```
 
 ## LLM Evolution Stages
@@ -181,7 +184,7 @@ legal_multiagent/
 │   ├── stage_1_direct_llm/
 │   ├── stage_2_rag_tools/
 │   ├── stage_3_single_agent/
-│   └── stage_4_multi_agent/
+│   └── stage_4_milti_agent/
 │
 └── docs/                      # Architecture diagrams (SVG)
 ```

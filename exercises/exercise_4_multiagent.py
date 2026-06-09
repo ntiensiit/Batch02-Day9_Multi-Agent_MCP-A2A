@@ -117,7 +117,7 @@ def aggregate_results(state: State) -> dict:
     if state.get("compliance_analysis"):
         sections.append(f"✅ PHÂN TÍCH TUÂN THỦ:\n{state['compliance_analysis']}")
     if state.get("privacy_analysis"):
-        sections.append(f"🔒 PHÂN TÍCH PRIBACY:\n{state['privacy_analysis']}")
+        sections.append(f"🔒 PHÂN TÍCH PRIVACY:\n{state['privacy_analysis']}")
     
     combined = "\n\n".join(sections)
     

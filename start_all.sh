@@ -16,6 +16,10 @@ TAX_PID=$!
 echo "Starting Compliance Agent on port 10103..."
 python -m compliance_agent &
 COMPLIANCE_PID=$!
+
+echo "Starting Privacy Agent on port 10104..."
+python -m privacy_agent &
+PRIVACY_PID=$!
 sleep 3
 
 echo "Starting Law Agent on port 10101..."
@@ -34,6 +38,7 @@ echo "  Customer Agent:   http://localhost:10100"
 echo "  Law Agent:        http://localhost:10101"
 echo "  Tax Agent:        http://localhost:10102"
 echo "  Compliance Agent: http://localhost:10103"
+echo "  Privacy Agent:    http://localhost:10104"
 echo ""
 echo "Run test_client.py to send a query:"
 echo "  python test_client.py"
@@ -41,4 +46,4 @@ echo ""
 echo "Press Ctrl+C to stop all services."
 
 # Wait for all background processes
-wait $REGISTRY_PID $TAX_PID $COMPLIANCE_PID $LAW_PID $CUSTOMER_PID
+wait $REGISTRY_PID $TAX_PID $COMPLIANCE_PID $PRIVACY_PID $LAW_PID $CUSTOMER_PID
